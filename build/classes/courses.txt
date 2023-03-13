@@ -1,0 +1,10 @@
+BCIS,Bachelor of Computer and Information Science
+HSCI,Bachelor of Health Science
+PHYS,Bachelor Advanced Physics
+ECON,Bachelor of Economics
+BUSI,Bachelor of Business
+ARTD,Bachelor of Art and Design
+BSCI,Bachelor of Science
+BLAW,Bachelor of Law
+BMKT,Bachelor of Marketing
+DIGD,Bachelor of Digital Design
