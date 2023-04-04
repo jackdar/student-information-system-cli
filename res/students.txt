@@ -1,1 +1,2 @@
-Jack,Darlington,21,
+1000,Jack,Darlington,21,mkb4291@aouniversity.ac.nz,jdar2001@gmail.com,0220446711,1,Corric Hill,Torbay,Auckland,0630,true,true
+1002,Bob,Jenkins,22,nxt0182@aouniversity.ac.nz,bjenk@gmail.com,0219573648,24A,Waverly St,Waiwera,Auckland,0630,true,false

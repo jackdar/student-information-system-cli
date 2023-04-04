@@ -30,6 +30,10 @@ public class Menu {
         this.menuDescription = description;
     }
     
+    public void setMenuOptions(String[] options) {
+        this.menuOptions = generateMenuOptions(options);
+    }
+    
     private HashMap<Integer, String> generateMenuOptions(String[] options) {
         HashMap<Integer, String> newMenuOptions = new HashMap<Integer, String>();
         for (int i = 1; i < options.length + 1; i++) {

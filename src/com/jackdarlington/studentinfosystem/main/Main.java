@@ -5,9 +5,6 @@
 package com.jackdarlington.studentinfosystem.main;
 
 import com.jackdarlington.studentinfosystem.menu.Menu;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
@@ -21,9 +18,8 @@ import java.util.Scanner;
 
 public class Main {
     
-    static HashMap<String,Paper> papers;
-    static HashMap<String,Course> courses;
-    
+    static HashMap<String, Paper> papers;
+    static HashMap<String, Course> courses;
     static HashMap<Integer, Student> students;
     
     static ArrayList<Menu> menu;
@@ -31,49 +27,40 @@ public class Main {
     public static void main(String[] args) {
         papers = Paper.initializePapers();
         courses = Course.initializeCourses();
-        
-        students = new HashMap<Integer, Student>();
+        students = Student.initializeStudents();
         
         menu = new ArrayList<Menu>();
         
-        menu.add(new Menu("Student Information System", new String[] {"Log In", "Create New Record"}));
+        menu.add(new Menu("Student Information System", new String[] {"Log In", "Create New Record", "Quit"}));
         menu.add(new Menu("Log In"));
         menu.add(new Menu("Create New Record"));
         menu.add(new Menu("Student Information System", new String[] {"Retrieve Record", "Edit Record", "Save Record", "Enrolments", "Grades", "Log Out"}));
         menu.add(new Menu("Retrieve Record"));
         menu.add(new Menu("Edit Record"));
         menu.add(new Menu("Save Record"));
-        menu.add(new Menu("Enrolments"));
+        menu.add(new Menu("Enrolments", new String[] {"Back"}));
         menu.add(new Menu("Grades"));
         menu.add(new Menu("Log Out"));
         
-        Student jack = new Student("Jack", "Darlington", "BCIS");
-        students.put(jack.studentID, jack);
         
-        /*
-        System.out.println(jack.course.courseCode + " " + jack.course.courseName);
-        System.out.println("================\nPossible Papers to Take:");
-        for(Paper p:jack.course.includedPapers) {
-            System.out.println(" - " + p.paperCode + " " + p.paperName);
+        students.get(1000).studentCourse = courses.get("BCIS");
+        
+        boolean quit = false;
+        while (quit == false) {
+            Scanner sc = new Scanner(System.in);
+
+            Student student = loginMenu(sc, quit);
+            if (student == null) {
+                quit = true;
+                break;
+            }
+            mainMenu(sc, student);
         }
-        */
-        
-        Scanner sc = new Scanner(System.in);
-        
-        Student student = loginMenu(sc);
-        if (student == null) {
-            System.out.println("Goodbye!");
-        }
-        
-        mainMenu(sc, student);
-        
-        
-        
-        
+        System.out.println("Goodbye!");
         
     }
     
-    public static Student loginMenu(Scanner sc) {
+    public static Student loginMenu(Scanner sc, boolean quit) {
         Student student = new Student();
         Menu.clearConsole();
         menu.get(0).printMenu();
@@ -93,11 +80,17 @@ public class Main {
                     Menu.clearConsole();
                 } catch (InterruptedException e) {}
                 break;
+            case "3":
+                student = null;
+                quit = true;
+                break;
             case "q":
                 student = null;
+                quit = true;
                 break;
             case "Q":
                 student = null;
+                quit = true;
                 break;
         }
         
@@ -129,14 +122,23 @@ public class Main {
                 case "3":
                     saveRecord(student);
                     break;
+                case "4":
+                    enrolments(sc, student);
+                    break;
+                case "6":
+                    System.out.println("Goodbye!");
+                    menuLoop = false;
+                    break;
                 case "q":
                     System.out.println("Goodbye!");
                     menuLoop = false;
                     break;
-
+                case "Q":
+                    System.out.println("Goodbye!");
+                    menuLoop = false;
+                    break;
             }
         }
-        
     }
     
     public static void retrieveRecord(Scanner sc, Student student) {
@@ -147,7 +149,7 @@ public class Main {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {}
-        System.out.print("Press any key to continue... ");
+        System.out.print("Press enter to continue... ");
         input = sc.nextLine();
     }
     
@@ -156,11 +158,19 @@ public class Main {
     }
     
     public static void saveRecord(Student student) {
-        PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(new File("res/students.txt"));
-        } catch (IOException e) {}
-        pw.print(student.firstName + "," + student.lastName + "," + student.age + ",");
-        pw.close();
+        Student.writeStudents(students);
+    }
+    
+    public static void enrolments(Scanner sc, Student student) {
+        Menu.clearConsole();
+        String input = "";
+        
+        menu.get(7).setMenuOptions(student.studentCourse == null ? new String[] {"Enrol in Course", "Back"} : new String[]{"Add New Papers", "Back"});
+        menu.get(7).setMenuDescription(student.printStudentEnrolmentInfo());
+        menu.get(7).printMenu();
+        
+        input = sc.nextLine().trim();
+        
+        
     }
 }

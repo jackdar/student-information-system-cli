@@ -14,6 +14,10 @@ import java.util.StringTokenizer;
  * Date: 08/03/2023
  */
 
+enum Grade {
+    NOT_COMPLETE, PASS, FAIL;
+}
+
 public class Paper {
 
     String paperCode;
@@ -46,7 +50,7 @@ public class Paper {
     }
     
     public static HashMap<String,Paper> initializePapers() {
-        HashMap<String,Paper> papers = new HashMap();
+        HashMap<String,Paper> papers = new HashMap<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(new File("res/papers.txt")));
             String line;
