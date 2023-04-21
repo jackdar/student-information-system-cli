@@ -4,6 +4,7 @@
 
 package com.jackdarlington.studentinfosystem.main;
 
+import static com.jackdarlington.studentinfosystem.main.Main.courses;
 import static com.jackdarlington.studentinfosystem.main.Main.menu;
 import static com.jackdarlington.studentinfosystem.main.Main.students;
 import com.jackdarlington.studentinfosystem.menu.Menu;
@@ -124,7 +125,7 @@ public class Student {
     public String printStudentEnrolmentInfo() {
         String studentEnrolments = this.studentCourse == null ? "Student has no current enrolments!" : this.studentCourse.courseCode + " - " + this.studentCourse.courseName;
         String studentPapers = "";
-        if (!(this.studentPapers == null)) {
+        if (this.studentPapers != null) {
             for (Entry e : this.studentPapers.entrySet()) {
                 studentPapers += "\n  - " + this.studentPapers.get(e.getKey()).name();
             }
@@ -330,14 +331,48 @@ public class Student {
         try {
             pw = new PrintWriter(new File("res/students.txt"));
             for (Map.Entry e : students.entrySet()) {
-                pw.println(e.getKey() + "," + students.get(e.getKey()).firstName + "," + students.get(e.getKey()).lastName + "," +
-                    students.get(e.getKey()).age + "," + students.get(e.getKey()).studentEmail + "," + students.get(e.getKey()).personalEmail + "," +
-                    students.get(e.getKey()).phoneNum + "," + students.get(e.getKey()).streetNum + "," + students.get(e.getKey()).streetName + "," +
-                    students.get(e.getKey()).suburb + "," + students.get(e.getKey()).city + "," + students.get( e.getKey()).postCode + "," +
-                    students.get(e.getKey()).isCurrentlyAttending +"," + students.get(e.getKey()).isRecievingSchoolEmail);
+                Student student = students.get(e.getKey());
+                pw.println(e.getKey() + "," + student.firstName + "," + student.lastName + "," +
+                    student.age + "," + student.studentEmail + "," + student.personalEmail + "," +
+                    student.phoneNum + "," + student.streetNum + "," + student.streetName + "," +
+                    student.suburb + "," + student.city + "," + student.postCode + "," +
+                    student.isCurrentlyAttending +"," + student.isRecievingSchoolEmail);
             }
         } catch (FileNotFoundException e) {}
         pw.close();
+    }
+    
+    public static Course enrolStudentInCourse(HashMap<String, Course> courses, Student student, Scanner sc) {     
+        String input = "";
+        System.out.println("Which course should would you like to enrol into?\n");
+        int i = 1;
+        for (Entry e : courses.entrySet()) {
+            Course course = courses.get(e.getKey());
+            System.out.println(" (" + i + ") " + course.courseCode + " - " + course.courseName);
+            i++;
+        }
+        input = sc.nextLine().trim();
+        return courses.get(Integer.parseInt(input) - 1);
+    }
+    
+    public static void enrolStudentInPapers(HashMap<String, Paper> papers, Student student, Scanner sc) {
+        String input = "";
+        System.out.println("Which paper would you like to enrol into? (q to quit)\n");
+        int i = 1;
+        for (Paper p : student.studentCourse.includedPapers) {
+            System.out.println(" (" + i + ") " + p.paperCode + " - " + p.paperName);
+            i++;
+        }
+        while (input != "q") {
+            input = sc.nextLine().trim();
+            if (Integer.parseInt(input) > 0 && Integer.parseInt(input) < student.studentCourse.includedPapers.size() + 1 && input != null) {
+                Paper selectedPaper = papers.get(Integer.parseInt(input) - 1);
+                student.studentPapers.put(selectedPaper, Grade.NOT_COMPLETE);
+                System.out.println("Student now enrolled in paper " + selectedPaper.paperCode + " - " + selectedPaper.paperName);
+            } else { 
+                System.out.println("That is not a valid paper!");
+            }
+        }
     }
     
 }

@@ -8,6 +8,7 @@ import com.jackdarlington.studentinfosystem.menu.Menu;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 /*
@@ -169,8 +170,22 @@ public class Main {
         menu.get(7).setMenuDescription(student.printStudentEnrolmentInfo());
         menu.get(7).printMenu();
         
-        input = sc.nextLine().trim();
+        try {
+            input = sc.nextLine().trim();
+        } catch (InputMismatchException e) {
+            System.out.println("Incorrect input!");
+        }
         
+        switch (input) {
+            case "1":
+                if (student.studentCourse == null) {
+                    student.studentCourse = Student.enrolStudentInCourse(courses, student, sc);
+                } else if (student.studentCourse != null) {
+                    Student.enrolStudentInPapers(papers, student, sc);
+                }
+            case "2":
+                return;
+        }
         
     }
 }
