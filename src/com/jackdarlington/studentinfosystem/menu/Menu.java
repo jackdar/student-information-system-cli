@@ -5,6 +5,7 @@
 package com.jackdarlington.studentinfosystem.menu;
 
 import java.util.HashMap;
+import java.util.Scanner;
 
 /*
  * @author Jack Darlington
@@ -14,76 +15,82 @@ import java.util.HashMap;
 
 public class Menu {
     
-    String menuTitle;
-    String menuDescription;
-    HashMap<Integer, String> menuOptions;
+    public String menuTitle;
+    public String menuDescription;
+    public HashMap<Integer, Option> menuOptions;
     
-    public String getMenuTitle() {
-        return this.menuTitle;
-    }
-    
-    public String getMenuDescription() {
-        return this.menuDescription;
-    }
-    
-    public void setMenuDescription(String description) {
-        this.menuDescription = description;
-    }
-    
-    public void setMenuOptions(String[] options) {
-        this.menuOptions = generateMenuOptions(options);
-    }
-    
-    private HashMap<Integer, String> generateMenuOptions(String[] options) {
-        HashMap<Integer, String> newMenuOptions = new HashMap<Integer, String>();
+    private HashMap<Integer, Option> generateMenuOptions(Option... options) {
+        HashMap<Integer, Option> newMenuOptions = new HashMap<Integer, Option>();
         for (int i = 1; i < options.length + 1; i++) {
             newMenuOptions.put(i, options[i-1]);
         }
         return newMenuOptions;
     }
     
-    public String printTitle() {
-        String out = "\n";
-        for (int i = 0; i < this.getMenuTitle().length() + 4; i++) {
-            out += "=";
+    public static void printTitle(String title) {
+        System.out.println();
+        for (int i = 0; i < title.length() + 4; i++) {
+            System.out.print("=");
         }
-        out += "\n  " + this.getMenuTitle() + "\n";
-        for (int i = 0; i < this.getMenuTitle().length() + 4; i++) {
-            out += "=";
+        System.out.println("\n  " + title);
+        for (int i = 0; i < title.length() + 4; i++) {
+            System.out.print("=");
         }
-        return out + "\n";
+        System.out.println("\n");
     }
     
-    public String printMenuOptions() {
-        String out = "";
-        for (HashMap.Entry<Integer, String> entry : menuOptions.entrySet()) {
-            out += "  (" + entry.getKey() + ") " + entry.getValue() + "\n";
+    public void printMenuOptions() {
+        for (HashMap.Entry<Integer, Option> entry : menuOptions.entrySet()) {
+            System.out.println("  (" + entry.getKey() + ") " + entry.getValue().optionTitle);
         }
-        return out;
+        System.out.println("  (" + (menuOptions.size() + 1) + ") Back");
     }
     
     public Menu(String title) {
         this.menuTitle = title;
     }
     
-    public Menu(String title, String[] options) {
+    public Menu(String title, Option... options) {
         this.menuTitle = title;
         this.menuOptions = generateMenuOptions(options);
     }
     
-    public Menu(String title, String description, String[] options) {
+    public Menu(String title, String description, Option... options) {
         this.menuTitle = title;
         this.menuDescription = description;
         this.menuOptions = generateMenuOptions(options);
     }
     
     public void printMenu() {
-        System.out.println(this.printTitle());
+        printTitle(this.menuTitle);
         if (this.menuDescription != null) {
-            System.out.println(this.getMenuDescription());
+            System.out.println(this.menuDescription + "\n");
         }
         if (this.menuOptions != null) {
-            System.out.println(this.printMenuOptions());
+            this.printMenuOptions();
+        }
+    }
+    
+    public void show() {
+        String input = "";
+        while (!input.equalsIgnoreCase("q")) {
+            clearConsole();
+            this.printMenu();
+            Scanner sc = new Scanner(System.in);
+            input = sc.nextLine().trim();
+            int number;
+            try {
+                number = Integer.parseInt(input);
+                if (number > 0 && number <= this.menuOptions.size()) {
+                    this.menuOptions.get(number).show();
+                } else if (number == this.menuOptions.size() + 1) {
+                    return;
+                } else {
+                    System.out.println("That is not a valid option! Try again!");
+                }
+            } catch (NumberFormatException ex) {
+                System.out.println("That is not a valid option! Try again!");
+            }
         }
     }
     

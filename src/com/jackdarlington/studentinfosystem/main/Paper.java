@@ -15,7 +15,19 @@ import java.util.StringTokenizer;
  */
 
 enum Grade {
-    NOT_COMPLETE, PASS, FAIL;
+    
+    NOT_COMPLETE("Not Complete"), PASS("Pass"), FAIL("Fail");
+    
+    public final String label;
+    
+    public String getLabel() {
+        return this.label;
+    }
+    
+    private Grade(String label) {
+        this.label = label;
+    }
+    
 }
 
 public class Paper {
@@ -69,6 +81,16 @@ public class Paper {
         }
         
         return papers;
+    }
+    
+    @Override
+    public String toString() {
+        return this.paperCode;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return this.paperCode.equals(((Paper) o).paperCode);
     }
     
 }

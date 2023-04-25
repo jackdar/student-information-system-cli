@@ -45,7 +45,7 @@ public class Course {
                             StringTokenizer stPapers = new StringTokenizer(linePapers, ",", false);
                             String course = stPapers.nextToken();
                             if(course.equals(courseCode)) {
-                                newCourse.includedPapers.add((Paper)Main.papers.get(stPapers.nextToken()));
+                                newCourse.includedPapers.add((Paper)InformationSystem.papers.get(stPapers.nextToken()));
                             }
                         }
                     } catch (IOException e) {
