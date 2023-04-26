@@ -4,6 +4,8 @@
 
 package com.jackdarlington.studentinfosystem.menu;
 
+import java.util.Scanner;
+
 /*
  * @author Jack Darlington
  * Student ID: 19082592
@@ -13,21 +15,32 @@ package com.jackdarlington.studentinfosystem.menu;
 public class Option {
     
     public String optionTitle;
-    public String optionDescription;
     public Menu optionMenu;
+    public boolean visible;
     
-    public Option(String title) {
-        this.optionTitle = title;
-    }
+    private Runnable descriptionMethod;
     
-    public Option(String title, String description) {
-        this.optionTitle = title;
-        this.optionDescription = description;
-    }
+    public Option(String title) { this(title, null, null, true); }
     
-    public Option(Menu menu) {
-        this.optionTitle = menu.menuTitle;
+    public Option(String title, boolean visible) { this (title, null, null, visible); }
+    
+    public Option(String title, Runnable descriptionMethod) { this(title, descriptionMethod, null, true); }
+    
+    public Option(String title, Runnable descriptionMethod, boolean visible) { this(title, descriptionMethod, null, visible); }
+    
+    public Option(Menu menu) { this(null, null, menu, true); }
+    
+    public Option(Menu menu, boolean visible) { this(null, null, menu, visible); }
+    
+    public Option(Runnable descriptionMethod, Menu menu) { this(null, descriptionMethod, menu, true); }
+    
+    public Option(Runnable descriptionMethod, Menu menu, boolean visible) { this(null, descriptionMethod, menu, visible); }
+    
+    public Option(String title, Runnable descriptionMethod, Menu menu, boolean visible) {
         this.optionMenu = menu;
+        this.optionTitle = title != null ? title : menu != null ? menu.menuTitle : null;
+        this.descriptionMethod = descriptionMethod;
+        this.visible = visible;
     }
     
     public boolean operation() {
@@ -43,11 +56,13 @@ public class Option {
             while (repeat) {
                 Menu.clearConsole();
                 Menu.printTitle(this.optionTitle);
-                if (this.optionDescription != null) {
-                    System.out.println(this.optionDescription + "\n");
+                if (this.descriptionMethod != null) {
+                    this.descriptionMethod.run();
+                    System.out.println();
                 }
                 repeat = this.operation();
             }
         }
     }
+    
 }

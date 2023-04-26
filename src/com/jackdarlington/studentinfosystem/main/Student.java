@@ -10,9 +10,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -46,9 +49,9 @@ enum Field {
 
 public class Student {
 
-    static int NEXT_ID_NUMBER = 1000;
+    static Integer NEXT_ID_NUMBER = 1000;
     
-    HashMap<Field, String> userDetails;
+    LinkedHashMap<Field, String> userDetails;
     
     boolean isCurrentlyAttending;
     boolean isRecievingSchoolEmail;
@@ -56,53 +59,41 @@ public class Student {
     Course studentCourse;
     HashMap<Paper, Grade> studentPapers;
     
-    final int studentID;
+    final Integer studentID;
     final String studentEmail;
     
-    public Student(int id) {
-        this.studentID = id;
-        NEXT_ID_NUMBER = id++;
-        
-        this.studentEmail = this.generateStudentEmail();
-        
-        this.initialiseUserDetailsMap();
+    public Student() {
+        this(null, null, null, null);
     }
     
-    public Student() {
-        this.studentID = NEXT_ID_NUMBER++;
-        this.studentEmail = this.generateStudentEmail();
-        
-        this.initialiseUserDetailsMap();
-        
-        this.isRecievingSchoolEmail = true;
+    public Student(Integer id) {
+        this(id, null, null, null);
     }
     
     public Student(String firstName, String lastName) {
-        this.studentID = NEXT_ID_NUMBER++;
+        this(null, firstName, lastName, null);
+    }
+    
+    public Student(Integer id, String firstName, String lastName, String courseCode) {
+        if (id != null) {
+            this.studentID = id;
+            NEXT_ID_NUMBER = id++;
+        } else {
+            this.studentID = NEXT_ID_NUMBER++;
+        }
+        
         this.studentEmail = this.generateStudentEmail();
         
         this.initialiseUserDetailsMap();
         
-        this.userDetails.replace(Field.FIRST_NAME, firstName);
-        this.userDetails.replace(Field.LAST_NAME, lastName);
+        this.userDetails.replace(Field.FIRST_NAME, firstName != null ? firstName : "");
+        this.userDetails.replace(Field.LAST_NAME, lastName != null ? lastName : "");
+        this.studentCourse = courseCode != null ? InformationSystem.courses.get(courseCode) : null;
+        this.studentPapers = new HashMap<>();
         
         this.isRecievingSchoolEmail = true;
     }
     
-    public Student(String firstName, String lastName, String courseCode) {
-        this.studentID = NEXT_ID_NUMBER++;
-        this.studentEmail = this.generateStudentEmail();
-        
-        this.initialiseUserDetailsMap();
-        
-        this.userDetails.replace(Field.FIRST_NAME, firstName);
-        this.userDetails.replace(Field.LAST_NAME, lastName);
-        
-        this.studentCourse = InformationSystem.courses.get(courseCode);
-        this.studentPapers = new HashMap<Paper, Grade>();
-        
-        this.isRecievingSchoolEmail = true;
-    }
     
     private String generateStudentEmail() {
         Random newRand = new Random(this.studentID);
@@ -132,26 +123,25 @@ public class Student {
         System.out.println(" Recieving school emails? " + isRecievingSchoolEmail);
     }
     
-    public String printStudentEnrolmentInfo() {
-        String studentEnrolments = this.studentCourse == null ? "Student has no current enrolments!" : this.studentCourse.courseCode + " - " + this.studentCourse.courseName;
-        String studentPapers = "";
+    public void printStudentEnrolmentInfo() {
+        System.out.println(" " + userDetails.get(Field.FIRST_NAME) + " " + userDetails.get(Field.LAST_NAME));
+        System.out.println(this.studentCourse == null ? " Student has no current enrolments!" : " " + this.studentCourse.courseCode + " - " + this.studentCourse.courseName);
         if (this.studentPapers != null) {
-            for (Entry e : this.studentPapers.entrySet()) {
-                studentPapers += "\n  - " + this.studentPapers.get(e.getKey()).name();
+            for (Entry<Paper, Grade> e : this.studentPapers.entrySet()) {
+                System.out.println("\n " + e.getKey().paperCode + " - " + e.getKey().paperName);
             }
         }
-        return " " + userDetails.get(Field.FIRST_NAME) + " " + userDetails.get(Field.LAST_NAME)+ "\n " + studentEnrolments + studentPapers + "\n";
     }
     
     private void initialiseUserDetailsMap() {
-        this.userDetails = new HashMap<Field, String>();
+        this.userDetails = new LinkedHashMap<>();
         for (Field f : Field.values()) {
             this.userDetails.put(f, "");
         }
     }
     
-    public static HashMap<Integer, Student> initialiseStudents() {
-        HashMap<Integer, Student> students = new HashMap<>();
+    public static LinkedHashMap<Integer, Student> initialiseStudents() {
+        LinkedHashMap<Integer, Student> students = new LinkedHashMap<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(new File("res/students.txt")));
             String line;
@@ -171,66 +161,70 @@ public class Student {
                     
                     if (st.hasMoreTokens()) {
                         newStudent.studentCourse = InformationSystem.courses.get(st.nextToken());
-                        while (st.hasMoreTokens()) {
-                            newStudent.studentPapers.put(InformationSystem.papers.get(st.nextToken()), Grade.valueOf(st.nextToken()));
+                        if (st.hasMoreTokens()) {
+                            while (st.hasMoreElements()) {
+                                newStudent.studentPapers.put(InformationSystem.papers.get(st.nextToken()), Grade.valueOf(st.nextToken()));
+                            }
                         }
                     }
                     
                     students.put(studentID, newStudent);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("IOException caught!");
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("File students.txt not found!");
         }
         return students;
     }
     
     public static boolean editStudent(Scanner sc, Student student) {
+        Student editStudent = student != null ? student : new Student();
         String input = "";
         try {
             for (Field f : Field.values()) {
-                System.out.print(" " + f.label + ": ");
+                System.out.print("  " + f.label + ": ");
                 input = sc.nextLine().trim();
                 if (f.equals(Field.EMAIL)) {
-                    student.userDetails.replace(f, input);
+                    editStudent.userDetails.replace(f, input);
                 }
                 else if (f.equals(Field.STREET_NAME)) {
-                    String[] streetName = input.split(" ");
-                    input = "";
-                    for (int i = 0; i < streetName.length; i++) {
-                        input += streetName[i].substring(0, 1).toUpperCase() + streetName[i].substring(1) + " ";
+                    if (input.equals("")) {
+                        editStudent.userDetails.replace(f, "");
+                    } else {
+                        String[] streetName = input.split(" ");
+                        input = "";
+                        for (String s : streetName) {
+                            input += s.substring(0, 1).toUpperCase() + s.substring(1) + " ";
+                        }
+                        editStudent.userDetails.replace(f, input.trim());
                     }
-                    student.userDetails.replace(f, input.trim());
-                }
-                else if (input.equals("")) {
-                    student.userDetails.replace(f, "");
                 }
                 else if (Character.isDigit(input.charAt(0))) {
-                    student.userDetails.replace(f, input);
+                    editStudent.userDetails.replace(f, input);
                 }
                 else {
-                    student.userDetails.replace(f, input.substring(0, 1).toUpperCase() + input.substring(1));
+                    editStudent.userDetails.replace(f, input.equals("") ? "" : input.substring(0, 1).toUpperCase() + input.substring(1));
                 }
             }
             
-            System.out.print(" Currently attending? (y/n): ");
-            student.isCurrentlyAttending = sc.nextLine().trim().equalsIgnoreCase("y");
+            System.out.print("  Currently attending? (y/n): ");
+            editStudent.isCurrentlyAttending = sc.nextLine().trim().equalsIgnoreCase("y");
             
-            System.out.print(" Recieving school emails? (y/n): ");
-            student.isRecievingSchoolEmail = sc.nextLine().trim().equalsIgnoreCase("y");
+            System.out.print("  Recieving school emails? (y/n): ");
+            editStudent.isRecievingSchoolEmail = sc.nextLine().trim().equalsIgnoreCase("y");
             
             System.out.println();
-            student.printStudentInfo();
+            editStudent.printStudentInfo();
             System.out.println();
             
-            System.out.print(" Continue without editing? (y/n): ");
+            System.out.print("  Continue without editing? (y/n): ");
             input = sc.nextLine();
             
             if (input.equalsIgnoreCase("y")) {
-                InformationSystem.students.put(student.studentID, student);
-                InformationSystem.student = InformationSystem.students.get(student.studentID);
+                InformationSystem.students.put(editStudent.studentID, editStudent);
+                InformationSystem.student = InformationSystem.students.get(editStudent.studentID);
                 return true;
             } else if (input.equalsIgnoreCase("n")) {
                 return false;
@@ -248,54 +242,64 @@ public class Student {
         PrintWriter pw = null;
         try {
             pw = new PrintWriter(new File("res/students.txt"));
-            for (Entry e : students.entrySet()) {
-                Student student = students.get(e.getKey());
+            for (Entry<Integer, Student> e : students.entrySet()) {
+                Student student = e.getValue();
                 pw.print(student.studentID + "," + student.studentEmail);
-                for (Entry f : student.userDetails.entrySet()) {
+                for (Entry<Field, String> f : student.userDetails.entrySet()) {
                     pw.print("," + f.getValue());
                 }
                 pw.print("," + student.isCurrentlyAttending + "," + student.isRecievingSchoolEmail);
                 if (student.studentCourse != null) {
                     pw.print("," + student.studentCourse.courseCode);
                 }
-                if (!student.studentPapers.isEmpty()) {
-                    for (Entry f : student.studentPapers.entrySet()) {
-                        pw.print("," + e.getKey().toString() + "," + e.getValue().toString());
+                if (student.studentPapers != null) {
+                    if (!student.studentPapers.isEmpty()) {
+                        for (Entry<Paper, Grade> f : student.studentPapers.entrySet()) {
+                            pw.print("," + f.getKey().paperCode + "," + f.getValue().toString());
+                        }
                     }
                 }
             }
         } catch (FileNotFoundException e) {}
-        pw.close();
+        if (pw != null) {
+            pw.close();
+        }
     }
     
-    public static Course enrolStudentInCourse(HashMap<String, Course> courses, Student student, Scanner sc) {     
+    public static void enrolStudentInCourse(HashMap<String, Course> courses, Student student, Scanner sc) {     
         String input = "";
         System.out.println("Which course should would you like to enrol into?\n");
-        int i = 1;
-        for (Entry e : courses.entrySet()) {
-            Course course = courses.get(e.getKey());
-            System.out.println(" (" + i + ") " + course.courseCode + " - " + course.courseName);
-            i++;
+        ArrayList<Course> courseList = new ArrayList<>();
+        for (Entry<String, Course> e : courses.entrySet()) {
+            courseList.add(e.getValue());
+        }
+        for (int i = 0; i < courseList.size(); i++) {
+            System.out.println(" (" + (i + 1) + ") " + courseList.get(i).courseCode + " - " + courseList.get(i).courseName);
         }
         input = sc.nextLine().trim();
-        return courses.get(Integer.parseInt(input) - 1);
+        student.studentCourse = courseList.get(Integer.parseInt(input) - 1);
+        System.out.println("Enrolled into course " + student.studentCourse.courseCode + " - " + student.studentCourse.courseName);
     }
     
     public static void enrolStudentInPapers(HashMap<String, Paper> papers, Student student, Scanner sc) {
         String input = "";
         System.out.println("Which paper would you like to enrol into? (q to quit)\n");
-        int i = 1;
-        for (Paper p : student.studentCourse.includedPapers) {
-            System.out.println(" (" + i + ") " + p.paperCode + " - " + p.paperName);
-            i++;
+        for (int i = 0; i < student.studentCourse.includedPapers.size(); i++) {
+            System.out.println(" (" + (i + 1) + ") " + student.studentCourse.includedPapers.get(i).paperCode + " - " + student.studentCourse.includedPapers.get(i).paperName);
         }
-        while (input != "q") {
+        while (!input.equalsIgnoreCase("q")) {
             input = sc.nextLine().trim();
-            if (Integer.parseInt(input) > 0 && Integer.parseInt(input) < student.studentCourse.includedPapers.size() + 1 && input != null) {
-                Paper selectedPaper = papers.get(Integer.parseInt(input) - 1);
-                student.studentPapers.put(selectedPaper, Grade.NOT_COMPLETE);
-                System.out.println("Student now enrolled in paper " + selectedPaper.paperCode + " - " + selectedPaper.paperName);
-            } else { 
+            int selection;
+            try {
+                selection = Integer.parseInt(input);
+                if (selection > 0 && selection <= student.studentCourse.includedPapers.size() && input != null) {
+                    Paper selectedPaper = student.studentCourse.includedPapers.get(selection - 1);
+                    student.studentPapers.put(selectedPaper, Grade.NOT_COMPLETE);
+                    System.out.println("Student now enrolled in paper " + selectedPaper.paperCode + " - " + selectedPaper.paperName);
+                } else { 
+                    System.out.println("That is not a valid paper!");
+                }
+            } catch (NumberFormatException e) {
                 System.out.println("That is not a valid paper!");
             }
         }
@@ -303,7 +307,7 @@ public class Student {
     
     @Override
     public String toString() {
-        return " " + userDetails.get(Field.FIRST_NAME) + " " + userDetails.get(Field.LAST_NAME) + "\n Student ID:    " + studentID + "\n Student Email: " + studentEmail;
+        return " Student Name:  " + userDetails.get(Field.FIRST_NAME) + " " + userDetails.get(Field.LAST_NAME) + "\n Student ID:    " + studentID + "\n Student Email: " + studentEmail;
     }
     
     @Override
@@ -315,7 +319,14 @@ public class Student {
             return false;
         }
         Student other = (Student) o;
-        return this.studentID == other.studentID;
+        return Objects.equals(this.studentID, other.studentID);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 79 * hash + Objects.hashCode(this.studentID);
+        return hash;
     }
     
 }

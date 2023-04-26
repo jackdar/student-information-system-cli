@@ -5,8 +5,9 @@
 package com.jackdarlington.studentinfosystem.main;
 
 import com.jackdarlington.studentinfosystem.menu.*;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 /*
@@ -19,7 +20,7 @@ public class InformationSystem {
     
     static HashMap<String, Paper> papers;
     static HashMap<String, Course> courses;
-    static HashMap<Integer, Student> students;
+    static LinkedHashMap<Integer, Student> students;
     
     static Student student = new Student();
     
@@ -35,11 +36,11 @@ public class InformationSystem {
         
         sc = new Scanner(System.in);
         
-        loginMenu = new Menu("Student Information System", 
+        loginMenu = new Menu("Student Information System", "Quit", 
             new Option("Log In") {
                 @Override
                 public boolean operation() {
-                    System.out.println("Please enter a Student ID to log in: ");
+                    System.out.print("Please enter a Student ID to log in: ");
                     String input = sc.nextLine().trim();
                     try {
                         student = students.get(Integer.valueOf(input));
@@ -68,7 +69,7 @@ public class InformationSystem {
                     return true;
                 }
             },
-            new Option("Create New Record", "Creating new Student record (" + student.studentID + "), type info or leave blank for none.") {
+            new Option("Create New Record", () -> System.out.println("Creating new Student record (" + student.studentID + "), type info or leave blank for none.")) {
                 @Override
                 public boolean operation() {
                     boolean login = Student.editStudent(sc, student);
@@ -80,21 +81,51 @@ public class InformationSystem {
             }
         );
 
-        mainMenu = new Menu("Student Information System", student.toString(),
+        Menu enrolmentMenu = new Menu("Enrolments", 
+            new Option("Enrol In Course") {
+                @Override
+                public boolean operation() {
+                    Student.enrolStudentInCourse(courses, student, sc);
+                    return false;
+                }
+            },
+            new Option("Add New Papers", false) {
+                @Override
+                public boolean operation() {
+                    Student.enrolStudentInPapers(papers, student, sc);
+                    return false;
+                }
+            },
+            new Option("Leave Course", false) {
+                @Override
+                public boolean operation() {
+                    student.studentCourse = null;
+                    student.studentPapers = new HashMap<>();
+                    return false;
+                }
+            }
+          
+        );
+        enrolmentMenu.setDescriptionMethod(() -> {
+            student.printStudentEnrolmentInfo();
+            if (student.studentCourse != null) {
+                enrolmentMenu.menuOptions.get(0).visible = false;
+                enrolmentMenu.menuOptions.get(1).visible = true;
+                enrolmentMenu.menuOptions.get(2).visible = true;
+            }
+        });
+        
+        mainMenu = new Menu("Student Information System", () -> System.out.println(student.toString()), "Log Out",
             new Option("Retrieve Record") {
                 @Override
                 public boolean operation() {
                     student.printStudentInfo();
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {}
-                    System.out.print("\nPress enter to continue... ");
-                    String input = sc.nextLine();
+                    Menu.anyKeyToContinue();
                     return false;
                 }
             },
-            new Option("Edit Record", "Editing record " + student.userDetails.get(Field.FIRST_NAME) + " " + 
-                    student.userDetails.get(Field.LAST_NAME) + " (" + student.studentID + "), type info or leave blank for none.") {
+            new Option("Edit Record", () -> System.out.println(" Editing record " + student.userDetails.get(Field.FIRST_NAME) + " " + 
+                    student.userDetails.get(Field.LAST_NAME) + " (" + student.studentID + "), type info or leave blank for none.")) {
                 @Override
                 public boolean operation() {
                     Student.editStudent(sc, student);
@@ -105,28 +136,23 @@ public class InformationSystem {
                 @Override
                 public boolean operation() {
                     Student.writeStudents(students);
+                    System.out.println("Student saved to file \"students.txt\".");
+                    Menu.anyKeyToContinue();
                     return false;
                 }
             },
-            new Option(
-                new Menu("Enrolments", student.printStudentEnrolmentInfo(),
-                    new Option(student.studentCourse == null ? "Enrol In Course" : "Add New Papers") {
-                        @Override
-                        public boolean operation() {
-                            if (student.studentCourse == null) {
-                                student.studentCourse = Student.enrolStudentInCourse(courses, student, sc);
-                            } else if (student.studentCourse != null) {
-                                Student.enrolStudentInPapers(papers, student, sc);
-                            }
-                            return false;
-                        }
-                    }
-                )
-            ),
+            new Option(enrolmentMenu),
             new Option("Grades") {
                 @Override
                 public boolean operation() {
-                    // TODO: Show student grades
+                    if (student.studentPapers.isEmpty()) {
+                        System.out.println("No Papers to show!");
+                    } else {
+                        for (Entry<Paper, Grade> e : student.studentPapers.entrySet()) {
+                            System.out.println(" " + e.getKey().paperCode + " - " + e.getKey().paperName + ": " + e.getValue().getLabel());
+                        }
+                        System.out.println();
+                    }
                     return false;
                 }
             }

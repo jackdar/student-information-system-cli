@@ -4,7 +4,8 @@
 
 package com.jackdarlington.studentinfosystem.menu;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 /*
@@ -16,14 +17,38 @@ import java.util.Scanner;
 public class Menu {
     
     public String menuTitle;
-    public String menuDescription;
-    public HashMap<Integer, Option> menuOptions;
+    public ArrayList<Option> menuOptions;
     
-    private HashMap<Integer, Option> generateMenuOptions(Option... options) {
-        HashMap<Integer, Option> newMenuOptions = new HashMap<Integer, Option>();
-        for (int i = 1; i < options.length + 1; i++) {
-            newMenuOptions.put(i, options[i-1]);
-        }
+    private Runnable descriptionMethod;
+    private String returnOptionText;
+    private ArrayList<Option> visibleOptions;
+    
+    public void setDescriptionMethod(Runnable descriptionMethod) {
+        this.descriptionMethod = descriptionMethod;
+    }
+    
+    public Menu(String title, Option... options) {
+        this(title, null, null, options);
+    }
+
+    public Menu(String title, String returnOptionText, Option... options) {
+        this(title, null, returnOptionText, options);
+    }
+
+    public Menu(String title, Runnable descriptionMethod, Option... options) {
+        this(title, descriptionMethod, null, options);
+    }
+
+    public Menu(String title, Runnable descriptionMethod, String returnOptionText, Option... options) {
+        this.menuTitle = title;
+        this.descriptionMethod = descriptionMethod;
+        this.menuOptions = generateMenuOptions(options);
+        this.returnOptionText = returnOptionText != null ? returnOptionText : "Back";
+    }
+    
+    private ArrayList<Option> generateMenuOptions(Option... options) {
+        ArrayList<Option> newMenuOptions = new ArrayList<>();
+        newMenuOptions.addAll(Arrays.asList(options));
         return newMenuOptions;
     }
     
@@ -40,31 +65,23 @@ public class Menu {
     }
     
     public void printMenuOptions() {
-        for (HashMap.Entry<Integer, Option> entry : menuOptions.entrySet()) {
-            System.out.println("  (" + entry.getKey() + ") " + entry.getValue().optionTitle);
+        this.visibleOptions = new ArrayList<>();
+        for (Option o : menuOptions) {
+            if (o.visible) {
+                visibleOptions.add(o);
+            }
         }
-        System.out.println("  (" + (menuOptions.size() + 1) + ") Back");
-    }
-    
-    public Menu(String title) {
-        this.menuTitle = title;
-    }
-    
-    public Menu(String title, Option... options) {
-        this.menuTitle = title;
-        this.menuOptions = generateMenuOptions(options);
-    }
-    
-    public Menu(String title, String description, Option... options) {
-        this.menuTitle = title;
-        this.menuDescription = description;
-        this.menuOptions = generateMenuOptions(options);
+        for (int i = 1; i < visibleOptions.size() + 1; i++) {
+            System.out.println("  (" + i + ") " + visibleOptions.get(i - 1).optionTitle);
+        }
+        System.out.println("  (" + (visibleOptions.size() + 1) + ") " + this.returnOptionText);
     }
     
     public void printMenu() {
         printTitle(this.menuTitle);
-        if (this.menuDescription != null) {
-            System.out.println(this.menuDescription + "\n");
+        if (this.descriptionMethod != null) {
+            this.descriptionMethod.run();
+            System.out.println();
         }
         if (this.menuOptions != null) {
             this.printMenuOptions();
@@ -81,9 +98,9 @@ public class Menu {
             int number;
             try {
                 number = Integer.parseInt(input);
-                if (number > 0 && number <= this.menuOptions.size()) {
-                    this.menuOptions.get(number).show();
-                } else if (number == this.menuOptions.size() + 1) {
+                if (number > 0 && number <= this.visibleOptions.size()) {
+                    this.visibleOptions.get(number - 1).show();
+                } else if (number == this.visibleOptions.size() + 1) {
                     return;
                 } else {
                     System.out.println("That is not a valid option! Try again!");
@@ -98,6 +115,15 @@ public class Menu {
         for (int i = 0; i < 50; i++) {
             System.out.println();
         }
+    }
+    
+    public static void anyKeyToContinue() {
+        Scanner sc = new Scanner(System.in);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {}
+        System.out.print("\nPress enter to continue... ");
+        sc.nextLine();
     }
     
 }
