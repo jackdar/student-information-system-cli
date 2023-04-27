@@ -57,7 +57,7 @@ public class Student {
     boolean isRecievingSchoolEmail;
     
     Course studentCourse;
-    HashMap<Paper, Grade> studentPapers;
+    LinkedHashMap<Paper, Grade> studentPapers;
     
     final Integer studentID;
     final String studentEmail;
@@ -77,7 +77,7 @@ public class Student {
     public Student(Integer id, String firstName, String lastName, String courseCode) {
         if (id != null) {
             this.studentID = id;
-            NEXT_ID_NUMBER = id++;
+            Student.NEXT_ID_NUMBER = ++id;
         } else {
             this.studentID = NEXT_ID_NUMBER++;
         }
@@ -89,7 +89,7 @@ public class Student {
         this.userDetails.replace(Field.FIRST_NAME, firstName != null ? firstName : "");
         this.userDetails.replace(Field.LAST_NAME, lastName != null ? lastName : "");
         this.studentCourse = courseCode != null ? InformationSystem.courses.get(courseCode) : null;
-        this.studentPapers = new HashMap<>();
+        this.studentPapers = new LinkedHashMap<>();
         
         this.isRecievingSchoolEmail = true;
     }
@@ -125,10 +125,11 @@ public class Student {
     
     public void printStudentEnrolmentInfo() {
         System.out.println(" " + userDetails.get(Field.FIRST_NAME) + " " + userDetails.get(Field.LAST_NAME));
-        System.out.println(this.studentCourse == null ? " Student has no current enrolments!" : " " + this.studentCourse.courseCode + " - " + this.studentCourse.courseName);
+        System.out.print(this.studentCourse == null ? " Student has no current enrolments!" : " " + this.studentCourse.courseCode + " - " + this.studentCourse.courseName);
         if (this.studentPapers != null) {
+            System.out.println();
             for (Entry<Paper, Grade> e : this.studentPapers.entrySet()) {
-                System.out.println("\n " + e.getKey().paperCode + " - " + e.getKey().paperName);
+                System.out.println(" " + e.getKey().paperCode + " - " + e.getKey().paperName);
             }
         }
     }
@@ -161,10 +162,8 @@ public class Student {
                     
                     if (st.hasMoreTokens()) {
                         newStudent.studentCourse = InformationSystem.courses.get(st.nextToken());
-                        if (st.hasMoreTokens()) {
-                            while (st.hasMoreElements()) {
-                                newStudent.studentPapers.put(InformationSystem.papers.get(st.nextToken()), Grade.valueOf(st.nextToken()));
-                            }
+                        while (st.hasMoreElements()) {
+                            newStudent.studentPapers.put(InformationSystem.papers.get(st.nextToken()), Grade.valueOf(st.nextToken()));
                         }
                     }
                     
@@ -186,7 +185,10 @@ public class Student {
             for (Field f : Field.values()) {
                 System.out.print("  " + f.label + ": ");
                 input = sc.nextLine().trim();
-                if (f.equals(Field.EMAIL)) {
+                if (input.equals("")) {
+                    editStudent.userDetails.replace(f, "");
+                }
+                else if (f.equals(Field.EMAIL)) {
                     editStudent.userDetails.replace(f, input);
                 }
                 else if (f.equals(Field.STREET_NAME)) {
@@ -266,45 +268,6 @@ public class Student {
         }
     }
     
-    public static void enrolStudentInCourse(HashMap<String, Course> courses, Student student, Scanner sc) {     
-        String input = "";
-        System.out.println("Which course should would you like to enrol into?\n");
-        ArrayList<Course> courseList = new ArrayList<>();
-        for (Entry<String, Course> e : courses.entrySet()) {
-            courseList.add(e.getValue());
-        }
-        for (int i = 0; i < courseList.size(); i++) {
-            System.out.println(" (" + (i + 1) + ") " + courseList.get(i).courseCode + " - " + courseList.get(i).courseName);
-        }
-        input = sc.nextLine().trim();
-        student.studentCourse = courseList.get(Integer.parseInt(input) - 1);
-        System.out.println("Enrolled into course " + student.studentCourse.courseCode + " - " + student.studentCourse.courseName);
-    }
-    
-    public static void enrolStudentInPapers(HashMap<String, Paper> papers, Student student, Scanner sc) {
-        String input = "";
-        System.out.println("Which paper would you like to enrol into? (q to quit)\n");
-        for (int i = 0; i < student.studentCourse.includedPapers.size(); i++) {
-            System.out.println(" (" + (i + 1) + ") " + student.studentCourse.includedPapers.get(i).paperCode + " - " + student.studentCourse.includedPapers.get(i).paperName);
-        }
-        while (!input.equalsIgnoreCase("q")) {
-            input = sc.nextLine().trim();
-            int selection;
-            try {
-                selection = Integer.parseInt(input);
-                if (selection > 0 && selection <= student.studentCourse.includedPapers.size() && input != null) {
-                    Paper selectedPaper = student.studentCourse.includedPapers.get(selection - 1);
-                    student.studentPapers.put(selectedPaper, Grade.NOT_COMPLETE);
-                    System.out.println("Student now enrolled in paper " + selectedPaper.paperCode + " - " + selectedPaper.paperName);
-                } else { 
-                    System.out.println("That is not a valid paper!");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("That is not a valid paper!");
-            }
-        }
-    }
-    
     @Override
     public String toString() {
         return " Student Name:  " + userDetails.get(Field.FIRST_NAME) + " " + userDetails.get(Field.LAST_NAME) + "\n Student ID:    " + studentID + "\n Student Email: " + studentEmail;
@@ -320,13 +283,6 @@ public class Student {
         }
         Student other = (Student) o;
         return Objects.equals(this.studentID, other.studentID);
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 79 * hash + Objects.hashCode(this.studentID);
-        return hash;
     }
     
 }

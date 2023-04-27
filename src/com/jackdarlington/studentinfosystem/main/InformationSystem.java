@@ -5,6 +5,7 @@
 package com.jackdarlington.studentinfosystem.main;
 
 import com.jackdarlington.studentinfosystem.menu.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
@@ -22,7 +23,7 @@ public class InformationSystem {
     static HashMap<String, Course> courses;
     static LinkedHashMap<Integer, Student> students;
     
-    static Student student = new Student();
+    static Student student;
     
     static Scanner sc;
     
@@ -30,9 +31,11 @@ public class InformationSystem {
     Menu mainMenu;
     
     public InformationSystem() {
-        papers = Paper.initializePapers();
-        courses = Course.initializeCourses();
+        papers = Paper.initialisePapers();
+        courses = Course.initialiseCourses();
         students = Student.initialiseStudents();
+        
+        student = new Student();
         
         sc = new Scanner(System.in);
         
@@ -85,14 +88,45 @@ public class InformationSystem {
             new Option("Enrol In Course") {
                 @Override
                 public boolean operation() {
-                    Student.enrolStudentInCourse(courses, student, sc);
+                    String input = "";
+                    System.out.println("Which course should would you like to enrol into?\n");
+                    ArrayList<Course> courseList = new ArrayList<>();
+                    for (Entry<String, Course> e : courses.entrySet()) {
+                        courseList.add(e.getValue());
+                    }
+                    for (int i = 0; i < courseList.size(); i++) {
+                        System.out.println(" (" + (i + 1) + ") " + courseList.get(i).courseCode + " - " + courseList.get(i).courseName);
+                    }
+                    input = sc.nextLine().trim();
+                    student.studentCourse = courseList.get(Integer.parseInt(input) - 1);
+                    System.out.println("Enrolled into course " + student.studentCourse.courseCode + " - " + student.studentCourse.courseName);
                     return false;
                 }
             },
             new Option("Add New Papers", false) {
                 @Override
                 public boolean operation() {
-                    Student.enrolStudentInPapers(papers, student, sc);
+                    String input = "";
+                    System.out.println("Which paper would you like to enrol into? (q to quit)\n");
+                    for (int i = 0; i < student.studentCourse.includedPapers.size(); i++) {
+                        System.out.println(" (" + (i + 1) + ") " + student.studentCourse.includedPapers.get(i).paperCode + " - " + student.studentCourse.includedPapers.get(i).paperName);
+                    }
+                    while (!input.equalsIgnoreCase("q")) {
+                        input = sc.nextLine().trim();
+                        int selection;
+                        try {
+                            selection = Integer.parseInt(input);
+                            if (selection > 0 && selection <= student.studentCourse.includedPapers.size() && input != null) {
+                                Paper selectedPaper = student.studentCourse.includedPapers.get(selection - 1);
+                                student.studentPapers.put(selectedPaper, Grade.NOT_COMPLETE);
+                                System.out.println("Student now enrolled in paper " + selectedPaper.paperCode + " - " + selectedPaper.paperName);
+                            } else { 
+                                System.out.println("That is not a valid paper!");
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("That is not a valid paper!");
+                        }
+                    }
                     return false;
                 }
             },
@@ -100,7 +134,7 @@ public class InformationSystem {
                 @Override
                 public boolean operation() {
                     student.studentCourse = null;
-                    student.studentPapers = new HashMap<>();
+                    student.studentPapers = new LinkedHashMap<>();
                     return false;
                 }
             }
@@ -112,7 +146,11 @@ public class InformationSystem {
                 enrolmentMenu.menuOptions.get(0).visible = false;
                 enrolmentMenu.menuOptions.get(1).visible = true;
                 enrolmentMenu.menuOptions.get(2).visible = true;
-            }
+            } else {
+                enrolmentMenu.menuOptions.get(0).visible = true;
+                enrolmentMenu.menuOptions.get(1).visible = false;
+                enrolmentMenu.menuOptions.get(2).visible = false;
+            }            
         });
         
         mainMenu = new Menu("Student Information System", () -> System.out.println(student.toString()), "Log Out",
@@ -136,7 +174,7 @@ public class InformationSystem {
                 @Override
                 public boolean operation() {
                     Student.writeStudents(students);
-                    System.out.println("Student saved to file \"students.txt\".");
+                    System.out.println("Student saved to file \"students.txt\".\n");
                     Menu.anyKeyToContinue();
                     return false;
                 }
@@ -146,13 +184,17 @@ public class InformationSystem {
                 @Override
                 public boolean operation() {
                     if (student.studentPapers.isEmpty()) {
-                        System.out.println("No Papers to show!");
+                        System.out.println(" No Papers to show!\n");
                     } else {
                         for (Entry<Paper, Grade> e : student.studentPapers.entrySet()) {
-                            System.out.println(" " + e.getKey().paperCode + " - " + e.getKey().paperName + ": " + e.getValue().getLabel());
+                            System.out.print(" " + e.getKey().paperCode + " - " + e.getKey().paperName);
+                            for (int i = 0; i < 40 - e.getKey().paperName.length(); i++) {
+                                System.out.print(" ");
+                            }
+                            System.out.println("GRADE: " + e.getValue().getLabel() + "\n");
                         }
-                        System.out.println();
                     }
+                    Menu.anyKeyToContinue();
                     return false;
                 }
             }

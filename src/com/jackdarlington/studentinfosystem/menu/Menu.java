@@ -122,7 +122,7 @@ public class Menu {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {}
-        System.out.print("\nPress enter to continue... ");
+        System.out.print("Press enter to continue... ");
         sc.nextLine();
     }
     

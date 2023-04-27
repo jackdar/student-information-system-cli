@@ -16,7 +16,17 @@ import java.util.StringTokenizer;
 
 enum Grade {
     
-    NOT_COMPLETE("Not Complete"), PASS("Pass"), FAIL("Fail");
+    NOT_COMPLETE("Not Complete"), 
+    FAIL("Fail"), 
+    C_MINUS("C-"), 
+    C("C"),
+    C_PLUS("C+"), 
+    B_MINUS("B-"),
+    B("B"),
+    B_PLUS("B+"),
+    A_MINUS("A-"),
+    A("A"),
+    A_PLUS("A+");
     
     public final String label;
     
@@ -61,7 +71,7 @@ public class Paper {
         this.paperName = paperName;
     }
     
-    public static HashMap<String,Paper> initializePapers() {
+    public static HashMap<String,Paper> initialisePapers() {
         HashMap<String,Paper> papers = new HashMap<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(new File("res/papers.txt")));

@@ -27,7 +27,7 @@ public class Course {
         this.includedPapers = new ArrayList<Paper>();
     }
     
-    public static HashMap<String,Course> initializeCourses() {
+    public static HashMap<String,Course> initialiseCourses() {
         HashMap<String,Course> courses = new HashMap<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(new File("res/courses.txt")));

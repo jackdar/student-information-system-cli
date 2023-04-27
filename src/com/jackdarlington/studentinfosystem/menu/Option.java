@@ -4,8 +4,6 @@
 
 package com.jackdarlington.studentinfosystem.menu;
 
-import java.util.Scanner;
-
 /*
  * @author Jack Darlington
  * Student ID: 19082592
@@ -20,21 +18,37 @@ public class Option {
     
     private Runnable descriptionMethod;
     
-    public Option(String title) { this(title, null, null, true); }
+    public Option(String title) {
+        this(title, null, null, true);
+    }
     
-    public Option(String title, boolean visible) { this (title, null, null, visible); }
+    public Option(String title, boolean visible) {
+        this (title, null, null, visible);
+    }
     
-    public Option(String title, Runnable descriptionMethod) { this(title, descriptionMethod, null, true); }
+    public Option(String title, Runnable descriptionMethod) {
+        this(title, descriptionMethod, null, true);
+    }
     
-    public Option(String title, Runnable descriptionMethod, boolean visible) { this(title, descriptionMethod, null, visible); }
+    public Option(String title, Runnable descriptionMethod, boolean visible) {
+        this(title, descriptionMethod, null, visible);
+    }
     
-    public Option(Menu menu) { this(null, null, menu, true); }
+    public Option(Menu menu) {
+        this(null, null, menu, true);
+    }
     
-    public Option(Menu menu, boolean visible) { this(null, null, menu, visible); }
+    public Option(Menu menu, boolean visible) {
+        this(null, null, menu, visible);
+    }
     
-    public Option(Runnable descriptionMethod, Menu menu) { this(null, descriptionMethod, menu, true); }
+    public Option(Runnable descriptionMethod, Menu menu) {
+        this(null, descriptionMethod, menu, true);
+    }
     
-    public Option(Runnable descriptionMethod, Menu menu, boolean visible) { this(null, descriptionMethod, menu, visible); }
+    public Option(Runnable descriptionMethod, Menu menu, boolean visible) {
+        this(null, descriptionMethod, menu, visible);
+    }
     
     public Option(String title, Runnable descriptionMethod, Menu menu, boolean visible) {
         this.optionMenu = menu;
