@@ -46,24 +46,14 @@ public class Menu {
         this.returnOptionText = returnOptionText != null ? returnOptionText : "Back";
     }
     
+    // Generate an ArrayList of Options from the optional arguments from Menu constructor
     private ArrayList<Option> generateMenuOptions(Option... options) {
         ArrayList<Option> newMenuOptions = new ArrayList<>();
         newMenuOptions.addAll(Arrays.asList(options));
         return newMenuOptions;
     }
     
-    public static void printTitle(String title) {
-        System.out.println();
-        for (int i = 0; i < title.length() + 4; i++) {
-            System.out.print("=");
-        }
-        System.out.println("\n  " + title);
-        for (int i = 0; i < title.length() + 4; i++) {
-            System.out.print("=");
-        }
-        System.out.println("\n");
-    }
-    
+    // Prints the list of currently visible Options stored in visibleOptions
     public void printMenuOptions() {
         this.visibleOptions = new ArrayList<>();
         for (Option o : menuOptions) {
@@ -77,6 +67,8 @@ public class Menu {
         System.out.println("  (" + (visibleOptions.size() + 1) + ") " + this.returnOptionText);
     }
     
+    // Prints the whole menu including running the description method.
+    // This method only runs when the user runs the menu, so all data is as up to date as possible.
     public void printMenu() {
         printTitle(this.menuTitle);
         if (this.descriptionMethod != null) {
@@ -88,6 +80,8 @@ public class Menu {
         }
     }
     
+    // The "main" method of the Menu, includes clearing the console, printing the menu, 
+    // and the logic for selecting an option along with error checking user input.
     public void show() {
         String input = "";
         while (!input.equalsIgnoreCase("q")) {
@@ -98,31 +92,55 @@ public class Menu {
             int number;
             try {
                 number = Integer.parseInt(input);
+                // If the user input is correct, go inside the show() method of the selected option.
+                // Once done, that Options show() method will pop back into to this scope.
                 if (number > 0 && number <= this.visibleOptions.size()) {
                     this.visibleOptions.get(number - 1).show();
                 } else if (number == this.visibleOptions.size() + 1) {
                     return;
                 } else {
                     System.out.println("That is not a valid option! Try again!");
+                    sleep(1000);
                 }
             } catch (NumberFormatException ex) {
                 System.out.println("That is not a valid option! Try again!");
+                sleep(1000);
             }
         }
     }
     
+    // Static method that creates a display title from String argument
+    public static void printTitle(String title) {
+        System.out.println();
+        for (int i = 0; i < title.length() + 4; i++) {
+            System.out.print("=");
+        }
+        System.out.println("\n  " + title);
+        for (int i = 0; i < title.length() + 4; i++) {
+            System.out.print("=");
+        }
+        System.out.println("\n");
+    }
+    
+    // Clear console by printing 50 empty lines
     public static void clearConsole() {  
         for (int i = 0; i < 50; i++) {
             System.out.println();
         }
     }
     
+    // Shorter hand sleep method (without try-catch every time)
+    public static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {}
+    }
+    
+    // Using a scanner to create a "press any key" method
     public static void anyKeyToContinue() {
         Scanner sc = new Scanner(System.in);
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {}
-        System.out.print("Press enter to continue... ");
+        sleep(500);
+        System.out.print("\nPress enter to continue... ");
         sc.nextLine();
     }
     

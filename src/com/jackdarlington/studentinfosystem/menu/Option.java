@@ -57,11 +57,16 @@ public class Option {
         this.visible = visible;
     }
     
+    // This is the method that is run when no nested menu is supplied.
+    // This method is to be overidden with custom logic.
     public boolean operation() {
         System.out.println("@Override for custom operation! Return true for repeat, false for no repeat.");
         return false;
     }
     
+    // The "main" option method. This method runs the show() method of a supplied nested menu,
+    // else it runs the custom logic provided in the operation() method.
+    // The returned boolean from opertaion() determines if the logic loops again or not.
     public void show() {
         if (this.optionMenu != null) {
             this.optionMenu.show();

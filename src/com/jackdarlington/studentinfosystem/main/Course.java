@@ -24,21 +24,24 @@ public class Course {
     public Course(String courseCode, String courseName) {
         this.courseCode = courseCode;
         this.courseName = courseName;
-        this.includedPapers = new ArrayList<Paper>();
+        this.includedPapers = new ArrayList<>();
     }
     
-    public static HashMap<String,Course> initialiseCourses() {
-        HashMap<String,Course> courses = new HashMap<>();
+    // Initialise Courses using courses.txt and map each relevant Paper to the correct Course using papersincourses.txt
+    public static HashMap<String, Course> initialiseCourses() {
+        HashMap<String, Course> courses = new HashMap<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(new File("res/courses.txt")));
             String line;
             try {
+                // Read in each line and use a StringTokenizer to split into tokens
                 while((line = br.readLine()) != null) {
                     StringTokenizer st = new StringTokenizer(line, ",", false);
                     String courseCode = st.nextToken();
                     Course newCourse = new Course(courseCode, st.nextToken());
                     
                     try {
+                        // Read in each line of papers in courses and if the courseCode matches the current line being read add that paper to current course
                         BufferedReader brPapers = new BufferedReader(new FileReader(new File("res/papersincourses.txt")));
                         String linePapers;
                         while((linePapers = brPapers.readLine()) != null) {
@@ -49,16 +52,16 @@ public class Course {
                             }
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        System.out.println("Failed to read Papers in Courses file!");
                     }
                     
                     courses.put(courseCode, newCourse);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Failed to read Courses file!");
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("File not found!");
         }
         
         return courses;

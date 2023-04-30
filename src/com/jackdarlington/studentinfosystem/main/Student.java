@@ -10,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.LinkedHashMap;
@@ -75,6 +74,7 @@ public class Student {
     }
     
     public Student(Integer id, String firstName, String lastName, String courseCode) {
+        // If id number is supplied, use it and set the NEXT_ID_NUMBER to id+1, else use the next id number
         if (id != null) {
             this.studentID = id;
             Student.NEXT_ID_NUMBER = ++id;
@@ -82,19 +82,25 @@ public class Student {
             this.studentID = NEXT_ID_NUMBER++;
         }
         
+        // Generate a student school email using the unique student id as a seed
         this.studentEmail = this.generateStudentEmail();
         
+        // Create a user details map using the enumerated type Field and a string for the value
         this.initialiseUserDetailsMap();
         
+        // If a first and last name have been supplied add into the details map here
         this.userDetails.replace(Field.FIRST_NAME, firstName != null ? firstName : "");
         this.userDetails.replace(Field.LAST_NAME, lastName != null ? lastName : "");
+        
+        // If provided a courseCode set the studentCourse here and instanciate studentPapers
         this.studentCourse = courseCode != null ? InformationSystem.courses.get(courseCode) : null;
         this.studentPapers = new LinkedHashMap<>();
         
         this.isRecievingSchoolEmail = true;
     }
     
-    
+    // Generate a random student email in the format {a-z}{a-z}{a-z}{0-9}{0-9}{0-9}{0-9}@aouniversity.co.nz
+    // using the studentID as a seed
     private String generateStudentEmail() {
         Random newRand = new Random(this.studentID);
         String newEmail = "";
@@ -109,6 +115,7 @@ public class Student {
         return newEmail;
     }
     
+    // Print a display of a student's record information
     public void printStudentInfo() {
         System.out.println(" Student Name:   " + userDetails.get(Field.FIRST_NAME) + " " + userDetails.get(Field.LAST_NAME));
         System.out.println(" Student ID:     " + studentID);
@@ -123,6 +130,7 @@ public class Student {
         System.out.println(" Recieving school emails? " + isRecievingSchoolEmail);
     }
     
+    // Print a display of a student's enrolment information
     public void printStudentEnrolmentInfo() {
         System.out.println(" " + userDetails.get(Field.FIRST_NAME) + " " + userDetails.get(Field.LAST_NAME));
         System.out.print(this.studentCourse == null ? " Student has no current enrolments!" : " " + this.studentCourse.courseCode + " - " + this.studentCourse.courseName);
@@ -134,6 +142,7 @@ public class Student {
         }
     }
     
+    // Initialise a HashMap with all the values of the Field enum as each key
     private void initialiseUserDetailsMap() {
         this.userDetails = new LinkedHashMap<>();
         for (Field f : Field.values()) {
@@ -141,25 +150,33 @@ public class Student {
         }
     }
     
+    // Initialise Students using students.txt and mapping each correct field into a students variables and details HashMap
     public static LinkedHashMap<Integer, Student> initialiseStudents() {
         LinkedHashMap<Integer, Student> students = new LinkedHashMap<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(new File("res/students.txt")));
             String line;
             try {
+                // Read in each line and use a StringTokenizer to split into tokens
                 while ((line = br.readLine()) != null) {
                     StringTokenizer st = new StringTokenizer(line, ",", false);
                     int studentID = Integer.parseInt(st.nextToken());
+                    
                     st.nextToken(); // throws away final studentEmail
+                    
+                    // Create the new student
                     Student newStudent = new Student(studentID);
                     
+                    // Set the details map
                     for (Field f : Field.values()) {
                         newStudent.userDetails.replace(f, st.nextToken());
                     }
                     
+                    // Sets student boolean variables
                     newStudent.isCurrentlyAttending = Boolean.parseBoolean(st.nextToken());
                     newStudent.isRecievingSchoolEmail = Boolean.parseBoolean(st.nextToken());
                     
+                    // If the student has enrolment data stored, read it in here
                     if (st.hasMoreTokens()) {
                         newStudent.studentCourse = InformationSystem.courses.get(st.nextToken());
                         while (st.hasMoreElements()) {
@@ -167,6 +184,7 @@ public class Student {
                         }
                     }
                     
+                    // Put the student in the local scope students HashMap
                     students.put(studentID, newStudent);
                 }
             } catch (IOException e) {
@@ -175,10 +193,11 @@ public class Student {
         } catch (FileNotFoundException e) {
             System.out.println("File students.txt not found!");
         }
+        
         return students;
     }
     
-    public static boolean editStudent(Scanner sc, Student student) {
+    public static Student editStudent(Scanner sc, Student student) {
         Student editStudent = student != null ? student : new Student();
         String input = "";
         try {
@@ -226,18 +245,18 @@ public class Student {
             
             if (input.equalsIgnoreCase("y")) {
                 InformationSystem.students.put(editStudent.studentID, editStudent);
-                InformationSystem.student = InformationSystem.students.get(editStudent.studentID);
-                return true;
+                InformationSystem.selectedStudent = InformationSystem.students.get(editStudent.studentID);
+                return editStudent;
             } else if (input.equalsIgnoreCase("n")) {
-                return false;
+                return null;
             } else {
                 System.out.println("Unexpected input! Continuing without editing.");
-                return true;
+                return editStudent;
             }
         } catch (InputMismatchException e) {
             System.out.println("Input mismatch!");
         }
-        return true;
+        return editStudent;
     }
     
     public static void writeStudents(HashMap<Integer, Student> students) {
@@ -261,6 +280,7 @@ public class Student {
                         }
                     }
                 }
+                pw.print("\n");
             }
         } catch (FileNotFoundException e) {}
         if (pw != null) {

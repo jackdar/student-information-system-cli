@@ -62,8 +62,7 @@ public class Paper {
     }
     
     public Paper() {
-        this.paperCode = "";
-        this.paperName = "";
+        this("", "");
     }
     
     public Paper(String paperCode, String paperName) {
@@ -71,12 +70,14 @@ public class Paper {
         this.paperName = paperName;
     }
     
-    public static HashMap<String,Paper> initialisePapers() {
-        HashMap<String,Paper> papers = new HashMap<>();
+    // Initialise Papers using data from papers.txt
+    public static HashMap<String, Paper> initialisePapers() {
+        HashMap<String, Paper> papers = new HashMap<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(new File("res/papers.txt")));
             String line;
             try {
+                // Read in each line and split using StringTokenizer and put into papers HashMap
                 while((line = br.readLine()) != null) {
                     StringTokenizer st = new StringTokenizer(line, ",", false);
                     String paperCode = st.nextToken();
@@ -84,10 +85,10 @@ public class Paper {
                     papers.put(paperCode, newPaper);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("IOException caught!");
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("Papers file not found!");
         }
         
         return papers;
