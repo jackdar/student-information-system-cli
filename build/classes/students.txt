@@ -3,3 +3,4 @@
 1002,lhn2565@aouniversity.ac.nz,Bobby,Parker,bpark_skate@yahoo.com,021857632,27,128,Cider St,Papakura,Auckland,0742,true,false
 1003,muh8578@aouniversity.ac.nz,Jessica,Harper,jharper_rok_on@gmail.com,02267540283,19,53,Beach Rd,Torbay,Auckland,0632,true,true
 1004,ooc5690@aouniversity.ac.nz,Jensen,Roland,jrolz@gmail.com,0275643674,24,48,Susan,St,Petone,1742,false,true
+1005,pcv1301@aouniversity.ac.nz,Jack,Darlington,jackdarlington2001@gmail.com,0220446711,21,1,Corric Hill,Torbay,Auckland,0630,true,true
